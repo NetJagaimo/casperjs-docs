@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Upgrading to 1.1 &#8212; CasperJS 1.1.0-DEV documentation</title>
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Known Issues" href="../known_issues.html" />
+    <link rel="prev" title="Upgrading" href="index.html" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Asap:400,700,400italic,700italic&amp;subset=latin,latin-ext">
+    <link rel="stylesheet" title="Dark theme" href="../_static/casperjs-dark.css">
+    <link rel="alternate stylesheet" title="Light theme" href="../_static/casperjs-light.css">
+    <script type="text/javascript" src="../_static/style-switcher.js"></script>
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../known_issues.html" title="Known Issues"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Upgrading"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">CasperJS 1.1.0-DEV documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Upgrading</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="upgrading-to-1-1">
+<h1>Upgrading to 1.1<a class="headerlink" href="#upgrading-to-1-1" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="testing-framework-refactor">
+<h2>Testing framework refactor<a class="headerlink" href="#testing-framework-refactor" title="Permalink to this headline">¶</a></h2>
+<p>The most visible change is the way you write tests. With 1.0, you were able to access a <code class="docutils literal notranslate"><span class="pre">.test</span></code> property from any casper script and so running a suite using the standard <code class="docutils literal notranslate"><span class="pre">casperjs</span></code> executable:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">// 1.0 style test script not using the `casperjs test` subcommand</span>
+<span class="kd">var</span> <span class="nx">casper</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;casper&#39;</span><span class="p">).</span><span class="nx">create</span><span class="p">();</span>
+
+<span class="nx">casper</span><span class="p">.</span><span class="nx">start</span><span class="p">(</span><span class="s1">&#39;http://foo.bar/&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">test</span><span class="p">.</span><span class="nx">assert</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">casper</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">test</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">test</span><span class="p">.</span><span class="nx">renderResults</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+<p>In 1.1, the test framework has been heavily refactored to decouple the tester from a casper instance as much as possible, so it’s no more possible to run a test suite right from the standard <code class="docutils literal notranslate"><span class="pre">casperjs</span></code> command as you would have done with the script shown above.</p>
+<p>Instead you now have to use the <a class="reference internal" href="../testing.html"><span class="doc">casperjs test</span></a> subcommand mandatorily to access a tester instance from the <code class="docutils literal notranslate"><span class="pre">casper.test</span></code> property.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>As of 1.1:</p>
+<ul class="simple">
+<li><p>you shouldn’t invoke the <code class="docutils literal notranslate"><span class="pre">renderResults()</span></code> method directly anymore</p></li>
+<li><p>you shouldn’t use the <code class="docutils literal notranslate"><span class="pre">done()</span></code> first argument to set planned test as it’s been deprecated</p></li>
+<li><p>you can’t access the <code class="docutils literal notranslate"><span class="pre">casper.test</span></code> property when not using the <code class="docutils literal notranslate"><span class="pre">casperjs</span> <span class="pre">test</span></code> subcommand</p></li>
+</ul>
+<p>If you try, you’ll get an error:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">// test.js</span>
+<span class="kd">var</span> <span class="nx">casper</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;casper&#39;</span><span class="p">).</span><span class="nx">create</span><span class="p">();</span>
+<span class="nx">casper</span><span class="p">.</span><span class="nx">test</span><span class="p">.</span><span class="nx">assert</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Will give:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ casperjs test.js
+CasperError: casper.test property is only available using the `casperjs test` command
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-new-tester-begin-method">
+<h3>The new <code class="docutils literal notranslate"><span class="pre">Tester#begin()</span></code> method<a class="headerlink" href="#the-new-tester-begin-method" title="Permalink to this headline">¶</a></h3>
+<p>However, a new <a class="reference internal" href="../modules/tester.html#tester-begin"><span class="std std-ref">begin()</span></a> method as been added to the <a class="reference internal" href="../modules/tester.html#tester-module"><span class="std std-ref">Tester</span></a> prototype, to ease describing your tests:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">casper</span><span class="p">.</span><span class="nx">test</span><span class="p">.</span><span class="nx">begin</span><span class="p">(</span><span class="s1">&#39;Description of my test&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">test</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">test</span><span class="p">.</span><span class="nx">assert</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+    <span class="nx">test</span><span class="p">.</span><span class="nx">done</span><span class="p">();</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+<p>More asynchronously:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">casper</span><span class="p">.</span><span class="nx">test</span><span class="p">.</span><span class="nx">begin</span><span class="p">(</span><span class="s1">&#39;Description of my test&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">test</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">casper</span><span class="p">.</span><span class="nx">start</span><span class="p">(</span><span class="s1">&#39;http://foo.bar/&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">test</span><span class="p">.</span><span class="nx">assert</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+    <span class="p">});</span>
+
+    <span class="nx">casper</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">test</span><span class="p">.</span><span class="nx">done</span><span class="p">();</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please notice <code class="docutils literal notranslate"><span class="pre">begin()</span></code>’s second argument which is now the place to set the number of planned tests.</p>
+</div>
+</div>
+</div>
+<div class="section" id="require-in-custom-modules">
+<h2>require() in custom modules<a class="headerlink" href="#require-in-custom-modules" title="Permalink to this headline">¶</a></h2>
+<p>CasperJS 1.1 now internally uses PhantomJS’ native <code class="docutils literal notranslate"><span class="pre">require()</span></code> function, but it has side effect if you write your own casperjs modules; in any casperjs module, you now have to use the new global <code class="docutils literal notranslate"><span class="pre">patchRequire()</span></code> function first:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">// casperjs module code</span>
+<span class="kd">var</span> <span class="nx">require</span> <span class="o">=</span> <span class="nx">patchRequire</span><span class="p">(</span><span class="nx">require</span><span class="p">);</span>
+<span class="c1">// now you can require casperjs builtins</span>
+<span class="kd">var</span> <span class="nx">utils</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;utils&#39;</span><span class="p">);</span>
+<span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1">// ...</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You don’t have to use <code class="docutils literal notranslate"><span class="pre">patchRequire()</span></code> in a standard casperjs script.</p>
+</div>
+</div>
+<div class="section" id="file-has-been-removed">
+<h2><code class="docutils literal notranslate"><span class="pre">__file__</span></code> has been removed<a class="headerlink" href="#file-has-been-removed" title="Permalink to this headline">¶</a></h2>
+<p>As of 1.1, CasperJS now uses native PhantomJS’ <code class="docutils literal notranslate"><span class="pre">require()</span></code> function which doesn’t support the <code class="docutils literal notranslate"><span class="pre">__file__</span></code> builtin variable within custom modules like 1.0 allowed.</p>
+</div>
+<div class="section" id="tester-getfailures-and-tester-getpasses-methods-removed">
+<h2><code class="docutils literal notranslate"><span class="pre">Tester#getFailures()</span></code> and <code class="docutils literal notranslate"><span class="pre">Tester#getPasses()</span></code> methods removed<a class="headerlink" href="#tester-getfailures-and-tester-getpasses-methods-removed" title="Permalink to this headline">¶</a></h2>
+<p>These two methods have been removed from the <a class="reference internal" href="../modules/tester.html"><span class="doc">Tester</span></a> API.</p>
+<p>You can retrieve test failure and success records by simply accessing <cite>tester.currentSuite.failures</cite> and <cite>tester.currentSuite.passes</cite> instead.</p>
+</div>
+<div class="section" id="step-and-run-completion-callbacks-don-t-throw-anymore">
+<h2>Step and run completion callbacks don’t throw anymore<a class="headerlink" href="#step-and-run-completion-callbacks-don-t-throw-anymore" title="Permalink to this headline">¶</a></h2>
+<p>Instead, you should listen to the <code class="docutils literal notranslate"><span class="pre">step.error</span></code> and <code class="docutils literal notranslate"><span class="pre">complete.error</span></code> events; if you really want to keep raising them:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">casper</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;step.error complete.error&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">throw</span> <span class="nx">error</span><span class="p">;</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Document Outline</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Upgrading to 1.1</a><ul>
+<li><a class="reference internal" href="#testing-framework-refactor">Testing framework refactor</a><ul>
+<li><a class="reference internal" href="#the-new-tester-begin-method">The new <code class="docutils literal notranslate"><span class="pre">Tester#begin()</span></code> method</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#require-in-custom-modules">require() in custom modules</a></li>
+<li><a class="reference internal" href="#file-has-been-removed"><code class="docutils literal notranslate"><span class="pre">__file__</span></code> has been removed</a></li>
+<li><a class="reference internal" href="#tester-getfailures-and-tester-getpasses-methods-removed"><code class="docutils literal notranslate"><span class="pre">Tester#getFailures()</span></code> and <code class="docutils literal notranslate"><span class="pre">Tester#getPasses()</span></code> methods removed</a></li>
+<li><a class="reference internal" href="#step-and-run-completion-callbacks-don-t-throw-anymore">Step and run completion callbacks don’t throw anymore</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Upgrading</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../known_issues.html"
+                        title="next chapter">Known Issues</a></p><h3>Index</h3>
+<p><a href="../genindex.html">Thesaurus</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/upgrading/1.1.rst.txt"
+           rel="nofollow">Show Source</a></li>
+   
+  </ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../known_issues.html" title="Known Issues"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Upgrading"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">CasperJS 1.1.0-DEV documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Upgrading</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2011-2020 Nicolas Perriault and contributors. CasperJS logo by Jeremy Forveille.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.1.
+    </div>
+  </body>
+</html>

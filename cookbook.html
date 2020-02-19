@@ -1,0 +1,351 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cookbook &#8212; CasperJS 1.1.0-DEV documentation</title>
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Changelog" href="changelog.html" />
+    <link rel="prev" title="FAQ" href="faq.html" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Asap:400,700,400italic,700italic&amp;subset=latin,latin-ext">
+    <link rel="stylesheet" title="Dark theme" href="_static/casperjs-dark.css">
+    <link rel="alternate stylesheet" title="Light theme" href="_static/casperjs-light.css">
+    <script type="text/javascript" src="_static/style-switcher.js"></script>
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="changelog.html" title="Changelog"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="faq.html" title="FAQ"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">CasperJS 1.1.0-DEV documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="cookbook"></span><div class="section" id="index-0">
+<span id="id1"></span><h1>Cookbook<a class="headerlink" href="#index-0" title="Permalink to this headline">¶</a></h1>
+<p>This is a collection of scripts and ideas that aim to solve common situations that are encountered by users.  This is by no means an exhaustive list, and we encourage you to contribute your recipes on <a class="reference external" href="https://github.com/casperjs/casperjs">github</a>.</p>
+<div class="section" id="creating-a-web-service">
+<h2>Creating a web service<a class="headerlink" href="#creating-a-web-service" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>It is worth noting that this is probably not the best of ideas.  You should be careful of things like memory leaks, lack of long term stability (due to said leaks), and the overall memory hog that headless JS can be.</p>
+</div>
+<p>With the above caveat in mind, a web service would look something like:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">//filename: server.js</span>
+
+<span class="c1">//define ip and port to web service</span>
+<span class="kd">var</span> <span class="nx">ip_server</span> <span class="o">=</span> <span class="s1">&#39;127.0.0.1:8585&#39;</span><span class="p">;</span>
+
+<span class="c1">//includes web server modules</span>
+<span class="kd">var</span> <span class="nx">server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;webserver&#39;</span><span class="p">).</span><span class="nx">create</span><span class="p">();</span>
+
+<span class="c1">//start web server</span>
+<span class="kd">var</span> <span class="nx">service</span> <span class="o">=</span> <span class="nx">server</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="nx">ip_server</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">request</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">links</span> <span class="o">=</span> <span class="p">[];</span>
+  <span class="kd">var</span> <span class="nx">casper</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;casper&#39;</span><span class="p">).</span><span class="nx">create</span><span class="p">();</span>
+
+  <span class="kd">function</span> <span class="nx">getLinks</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">links</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">querySelectorAll</span><span class="p">(</span><span class="s1">&#39;h3.r a&#39;</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">map</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">links</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">e</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">)</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+
+  <span class="nx">casper</span><span class="p">.</span><span class="nx">start</span><span class="p">(</span><span class="s1">&#39;http://google.com/&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// search for &#39;casperjs&#39; from google form</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">fill</span><span class="p">(</span><span class="s1">&#39;form[action=&quot;/search&quot;]&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">q</span><span class="o">:</span> <span class="nx">request</span><span class="p">.</span><span class="nx">postRaw</span> <span class="p">},</span> <span class="kc">true</span><span class="p">);</span>
+  <span class="p">});</span>
+
+  <span class="nx">casper</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// aggregate results for the &#39;casperjs&#39; search</span>
+    <span class="nx">links</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(</span><span class="nx">getLinks</span><span class="p">);</span>
+  <span class="p">});</span>
+
+  <span class="nx">casper</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">response</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">=</span> <span class="mi">200</span><span class="p">;</span>
+
+    <span class="c1">//sends results as JSON object</span>
+    <span class="nx">response</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">links</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">));</span>
+    <span class="nx">response</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Server running at http://&#39;</span> <span class="o">+</span> <span class="nx">ip_server</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>You can start the server by executing:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>casperjs server.js
+</pre></div>
+</div>
+<p>You can then access the results via an HTTP POST request:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>curl --data &quot;casperjs&quot; http://127.0.0.1:8585/
+</pre></div>
+</div>
+<p>The above command would search for “casperjs” on google and return a JSON array of results.  This is a trivial example and can be expanded into something more complex.</p>
+</div>
+<div class="section" id="script-to-automatically-check-a-page-for-404-and-500-errors">
+<h2>Script to automatically check a page for 404 and 500 errors<a class="headerlink" href="#script-to-automatically-check-a-page-for-404-and-500-errors" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">var</span> <span class="nx">casper</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;casper&quot;</span><span class="p">).</span><span class="nx">create</span><span class="p">({</span>
+  <span class="nx">pageSettings</span><span class="o">:</span> <span class="p">{</span>
+    <span class="nx">loadImages</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="nx">loadPlugins</span><span class="o">:</span> <span class="kc">false</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+<span class="kd">var</span> <span class="nx">checked</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="kd">var</span> <span class="nx">currentLink</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">upTo</span> <span class="o">=</span> <span class="o">~~</span><span class="nx">casper</span><span class="p">.</span><span class="nx">cli</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;max-depth&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="mi">100</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">url</span> <span class="o">=</span> <span class="nx">casper</span><span class="p">.</span><span class="nx">cli</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">baseUrl</span> <span class="o">=</span> <span class="nx">url</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">links</span> <span class="o">=</span> <span class="p">[</span><span class="nx">url</span><span class="p">];</span>
+<span class="kd">var</span> <span class="nx">utils</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;utils&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">f</span> <span class="o">=</span> <span class="nx">utils</span><span class="p">.</span><span class="nx">format</span><span class="p">;</span>
+
+<span class="kd">function</span> <span class="nx">absPath</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">base</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">new</span> <span class="nx">URI</span><span class="p">(</span><span class="nx">url</span><span class="p">).</span><span class="nx">resolve</span><span class="p">(</span><span class="k">new</span> <span class="nx">URI</span><span class="p">(</span><span class="nx">base</span><span class="p">)).</span><span class="nx">toString</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="c1">// Clean links</span>
+<span class="kd">function</span> <span class="nx">cleanLinks</span><span class="p">(</span><span class="nx">urls</span><span class="p">,</span> <span class="nx">base</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">utils</span><span class="p">.</span><span class="nx">unique</span><span class="p">(</span><span class="nx">urls</span><span class="p">).</span><span class="nx">filter</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">url</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">baseUrl</span><span class="p">)</span> <span class="o">===</span> <span class="mi">0</span> <span class="o">||</span> <span class="o">!</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s1">&#39;^(#|ftp|javascript|http)&#39;</span><span class="p">).</span><span class="nx">test</span><span class="p">(</span><span class="nx">url</span><span class="p">);</span>
+  <span class="p">}).</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">absPath</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">base</span><span class="p">);</span>
+  <span class="p">}).</span><span class="nx">filter</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">checked</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span> <span class="o">===</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="c1">// Opens the page, perform tests and fetch next links</span>
+<span class="kd">function</span> <span class="nx">crawl</span><span class="p">(</span><span class="nx">link</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">start</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">echo</span><span class="p">(</span><span class="nx">link</span><span class="p">,</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">);</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="nx">link</span><span class="p">);</span>
+      <span class="nx">checked</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">link</span><span class="p">);</span>
+  <span class="p">});</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">currentHTTPStatus</span> <span class="o">===</span> <span class="mi">404</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="nx">link</span> <span class="o">+</span> <span class="s1">&#39; is missing (HTTP 404)&#39;</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">currentHTTPStatus</span> <span class="o">===</span> <span class="mi">500</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="nx">link</span> <span class="o">+</span> <span class="s1">&#39; is broken (HTTP 500)&#39;</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">echo</span><span class="p">(</span><span class="nx">link</span> <span class="o">+</span> <span class="nx">f</span><span class="p">(</span><span class="s1">&#39; is okay (HTTP %s)&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">currentHTTPStatus</span><span class="p">));</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">newLinks</span> <span class="o">=</span> <span class="nx">searchLinks</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="nx">links</span> <span class="o">=</span> <span class="nx">links</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">newLinks</span><span class="p">).</span><span class="nx">filter</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">checked</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span> <span class="o">===</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">echo</span><span class="p">(</span><span class="nx">newLinks</span><span class="p">.</span><span class="nx">length</span> <span class="o">+</span> <span class="s2">&quot; new links found on &quot;</span> <span class="o">+</span> <span class="nx">link</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="c1">// Fetch all &lt;a&gt; elements from the page and return</span>
+<span class="c1">// the ones which contains a href starting with &#39;http://&#39;</span>
+<span class="kd">function</span> <span class="nx">searchLinks</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">cleanLinks</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(</span><span class="kd">function</span> <span class="nx">_fetchInternalLinks</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[].</span><span class="nx">map</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">__utils__</span><span class="p">.</span><span class="nx">findAll</span><span class="p">(</span><span class="s1">&#39;a[href]&#39;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">node</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">);</span>
+    <span class="p">});</span>
+  <span class="p">}),</span> <span class="k">this</span><span class="p">.</span><span class="nx">getCurrentUrl</span><span class="p">());</span>
+<span class="p">}</span>
+
+<span class="c1">// As long as it has a next link, and is under the maximum limit, will keep running</span>
+<span class="kd">function</span> <span class="nx">check</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">links</span><span class="p">[</span><span class="nx">currentLink</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="nx">currentLink</span> <span class="o">&lt;</span> <span class="nx">upTo</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">crawl</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">links</span><span class="p">[</span><span class="nx">currentLink</span><span class="p">]);</span>
+    <span class="nx">currentLink</span><span class="o">++</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="nx">check</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">echo</span><span class="p">(</span><span class="s2">&quot;All done, &quot;</span> <span class="o">+</span> <span class="nx">checked</span><span class="p">.</span><span class="nx">length</span> <span class="o">+</span> <span class="s2">&quot; links checked.&quot;</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">exit</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">url</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">casper</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s1">&#39;No url passed, aborting.&#39;</span><span class="p">).</span><span class="nx">exit</span><span class="p">();</span>
+<span class="p">}</span>
+
+
+<span class="nx">casper</span><span class="p">.</span><span class="nx">start</span><span class="p">(</span><span class="s1">&#39;https://gist.githubusercontent.com/pieplu/6be55d1d8f27ea9b8dcf4de6b1933547/raw/5e8d996fe1d86edac93825d0050fd359caf74f8e/URI.js&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">scriptCode</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">getPageContent</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;; return URI;&#39;</span><span class="p">;</span>
+  <span class="nb">window</span><span class="p">.</span><span class="nx">URI</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Function</span><span class="p">(</span><span class="nx">scriptCode</span><span class="p">)();</span>
+  <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nb">window</span><span class="p">.</span><span class="nx">URI</span> <span class="o">===</span> <span class="s2">&quot;function&quot;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">echo</span><span class="p">(</span><span class="s1">&#39;URI.js loaded&#39;</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s1">&#39;Could not setup URI.js&#39;</span><span class="p">).</span><span class="nx">exit</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">echo</span><span class="p">(</span><span class="s2">&quot;Starting&quot;</span><span class="p">);</span>
+<span class="p">}).</span><span class="nx">run</span><span class="p">(</span><span class="nx">check</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Run it with:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>casperjs 404checker.js http://mysite.tld/ [--max-depth=42]
+</pre></div>
+</div>
+<p><a class="reference external" href="https://gist.github.com/n1k0/4509789">Reference gist</a>.</p>
+</div>
+<div class="section" id="test-drag-drop">
+<h2>Test drag&amp;drop<a class="headerlink" href="#test-drag-drop" title="Permalink to this headline">¶</a></h2>
+<p>Assuming a page containing a draggable element like that <a class="reference external" href="http://codepen.io/ebrehault/pen/grQdyN/">one</a>, we can test drag&amp;drop that way:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">casper</span><span class="p">.</span><span class="nx">test</span><span class="p">.</span><span class="nx">begin</span><span class="p">(</span><span class="s1">&#39;Test drag&amp;drop&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">test</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">casper</span><span class="p">.</span><span class="nx">start</span><span class="p">(</span><span class="s1">&#39;http://localhost:8000/example.html&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">test</span><span class="p">.</span><span class="nx">assertEval</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">pos</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#box&#39;</span><span class="p">).</span><span class="nx">position</span><span class="p">();</span>
+      <span class="k">return</span> <span class="p">(</span><span class="nx">pos</span><span class="p">.</span><span class="nx">left</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">pos</span><span class="p">.</span><span class="nx">top</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="p">},</span> <span class="s2">&quot;The box is at the top&quot;</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">mouse</span><span class="p">.</span><span class="nx">down</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">mouse</span><span class="p">.</span><span class="nx">move</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">200</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">mouse</span><span class="p">.</span><span class="nx">up</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">200</span><span class="p">);</span>
+  <span class="p">});</span>
+  <span class="nx">casper</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">test</span><span class="p">.</span><span class="nx">assertEval</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">pos</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#box&#39;</span><span class="p">).</span><span class="nx">position</span><span class="p">();</span>
+      <span class="k">return</span> <span class="p">(</span><span class="nx">pos</span><span class="p">.</span><span class="nx">left</span> <span class="o">==</span> <span class="mi">395</span> <span class="o">&amp;&amp;</span> <span class="nx">pos</span><span class="p">.</span><span class="nx">top</span> <span class="o">==</span> <span class="mi">195</span><span class="p">);</span>
+    <span class="p">},</span> <span class="s2">&quot;The box has been moved&quot;</span><span class="p">);</span>
+  <span class="p">});</span>
+  <span class="nx">casper</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">test</span><span class="p">.</span><span class="nx">done</span><span class="p">();</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="passing-parameters-into-your-tests">
+<h2>Passing parameters into your tests<a class="headerlink" href="#passing-parameters-into-your-tests" title="Permalink to this headline">¶</a></h2>
+<p>Let’s say you want to be able to change the Uri your tests visits depending on what you are testing. To do this, you can add custom <cite>–parameter=value</cite> to your cli.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">// casperjs test /foo/bar --url=test.html</span>
+<span class="kd">var</span> <span class="nx">url</span> <span class="o">=</span> <span class="s1">&#39;http://localhost:8000&#39;</span>
+<span class="kd">var</span> <span class="nx">cli</span> <span class="o">=</span> <span class="nx">casper</span><span class="p">.</span><span class="nx">cli</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="nx">cli</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="s1">&#39;url&#39;</span><span class="p">))</span> <span class="p">{</span>
+  <span class="nx">url</span> <span class="o">=</span> <span class="nx">cli</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;url&#39;</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;\n\tUsing url: &#39;</span> <span class="o">+</span> <span class="nx">url</span> <span class="o">+</span> <span class="s1">&#39;\n&#39;</span><span class="p">)</span>
+
+<span class="nx">casper</span><span class="p">.</span><span class="nx">test</span><span class="p">.</span><span class="nx">begin</span><span class="p">(...)</span>
+</pre></div>
+</div>
+<p>You can find the complete documentation for the cli object in <a class="reference external" href="http://docs.casperjs.org/en/latest/cli.html">http://docs.casperjs.org/en/latest/cli.html</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Using the command line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="selectors.html">Selectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing_modules.html">Writing CasperJS modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events-filters.html">Events &amp; Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending.html">Extending</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Cookbook</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#creating-a-web-service">Creating a web service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#script-to-automatically-check-a-page-for-404-and-500-errors">Script to automatically check a page for 404 and 500 errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-drag-drop">Test drag&amp;drop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#passing-parameters-into-your-tests">Passing parameters into your tests</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="faq.html"
+                        title="previous chapter">FAQ</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="changelog.html"
+                        title="next chapter">Changelog</a></p><h3>Index</h3>
+<p><a href="genindex.html">Thesaurus</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/cookbook.rst.txt"
+           rel="nofollow">Show Source</a></li>
+   
+  </ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>Donate</h3>
+<div class="donate">
+    <div class="paypal">
+        <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+            <input type="hidden" name="cmd" value="_s-xclick">
+            <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----">
+            <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Donate" title="Donate">
+            <img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+        </form>
+        <small>(ghosts have bills, you know)</small>
+    </div>
+    <div class="flattr">
+        <a href="http://flattr.com/thing/586241/CasperJS-a-navigation-scripting-and-testing-utility-for-PhantomJS" class="flattr" target="_blank"><img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0"></a>
+    </div>
+</div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="changelog.html" title="Changelog"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="faq.html" title="FAQ"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">CasperJS 1.1.0-DEV documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2011-2020 Nicolas Perriault and contributors. CasperJS logo by Jeremy Forveille.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.1.
+    </div>
+  </body>
+</html>
